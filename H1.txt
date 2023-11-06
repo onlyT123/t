@@ -1,1 +1,242 @@
-this is new folder
+apt-get update -y
+apt-get upgrade -y
+
+apt-get install default-jdk default-jre -y
+java -version
+
+adduser hadoop
+usermod -aG sudo hadoop
+
+su hadoop
+ssh-keygen -t rsa
+
+cat ~/.ssh/id_rsa.pub &gt;&gt; ~/.ssh/authorized_keys
+chmod 0600 ~/.ssh/authorized_keys
+
+ssh localhost
+
+download hadoop 3.2.1.tar file
+cd /home/student/Desktop/
+ls
+sudo tar -xvzf hadoop-3.2.1.tar.gz
+
+sudo mv hadoop-3.2.1 /usr/local/hadoop
+
+sudo mkdir /usr/local/hadoop/logs
+
+sudo chown -R hadoop:hadoop /usr/local/hadoop
+
+sudo gedit ~/.bashrc
+Add the following lines at the enfdof the file:
+export HADOOP_HOME=/usr/local/hadoop
+export HADOOP_INSTALL=$HADOOP_HOME
+export HADOOP_MAPRED_HOME=$HADOOP_HOME
+export HADOOP_COMMON_HOME=$HADOOP_HOME
+export HADOOP_HDFS_HOME=$HADOOP_HOME
+export YARN_HOME=$HADOOP_HOME
+export HADOOP_COMMON_LIB_NATIVE_DIR=$HADOOP_HOME/lib/native
+export PATH=$PATH:$HADOOP_HOME/sbin:$HADOOP_HOME/bin
+export HADOOP_OPTS=&quot;-Djava.library.path=$HADOOP_HOME/lib/native&quot;
+
+source ~/.bashrc
+
+11)Configure Hadoop
+Configure Java Environment Variables
+which javac
+expected output is
+/usr/bin/javac
+readlink -f /usr/bin/javac
+output:
+/usr/lib/jvm/java-11-openjdk-amd64/bin/javac
+
+sudo gedit $HADOOP_HOME/etc/hadoop/hadoop-env.sh
+Add the following lines:
+export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+export HADOOP_CLASSPATH+=&quot; $HADOOP_HOME/lib/*.jar&quot;
+
+cd /usr/local/hadoop/lib
+sudo wget https://jcenter.bintray.com/javax/activation/javax.activation-
+api/1.2.0/javax.activation-api-1.2.0.jar
+
+hadoop version
+
+sudo gedit $HADOOP_HOME/etc/hadoop/core-site.xml
+Add the following lines:
+<configuration&gt>
+<property&gt>
+<name>fs.default.name&lt</name>
+<value>hdfs://0.0.0.0:9000</value>
+<description>The default file system URI</description>
+</property>
+</configuration>
+
+sudo mkdir -p /home/hadoop/hdfs/{namenode,datanode}
+sudo chown -R hadoop:hadoop /home/hadoop/hdfs
+
+sudo gedit $HADOOP_HOME/etc/hadoop/hdfs-site.xml
+Add the following lines:
+<configuration>
+<property>
+<name&gt;dfs.replication</name>
+<value&gt;1</value>
+</property>
+<property>
+<name&gt;dfs.name.dir</name>
+<value&gt;file:///home/hadoop/hdfs/namenode</value>
+</property>
+<property>
+<name&gt;dfs.data.dir</name>
+<value&gt;file:///home/hadoop/hdfs/datanode</value>
+</property>
+</configuration>
+Save and close the file.
+
+sudo gedit $HADOOP_HOME/etc/hadoop/mapred-site.xml
+Add the following lines:
+<configuration>
+<property>
+<name&gt;mapreduce.framework.name</name>
+<value&gt;yarn</value>
+</property>
+</configuration>
+Save and close the file.
+
+sudo gedit $HADOOP_HOME/etc/hadoop/yarn-site.xml
+Add the following lines:
+&lt<configuration>
+&lt<property>
+&lt<name>yarn.nodemanager.aux-services</name>
+&lt<value>mapreduce_shuffle</value>
+&lt</property>
+&lt</configuration>
+Save and close the file
+
+hdfs namenode -format
+
+start-dfs.sh
+start-yarn.sh
+jps
+
+http://localhost:9870/
+http://localhost:8088
+
+=-=-=-=-=-=-=-==--=-====----====-=-=-=-=-=-=-=-=-=--=
+now hdfs HADOOP COMMON
+
+student@linux:~$ su hadoop
+Password: type 123
+hadoop@linux:/home/student$ start-dfs.sh
+Starting namenodes on [0.0.0.0]
+Starting datanodes
+Starting secondary namenodes [linux]
+linux: Warning: Permanently added &#39;linux&#39; (ECDSA) to the list of known hosts.
+hadoop@linux:/home/student$ start-yarn.sh
+Starting resourcemanager
+Starting nodemanagers
+hadoop@linux:/home/student$ jps
+4215 ResourceManager
+3431 DataNode
+4730 Jps
+3628 SecondaryNameNode
+4380 NodeManager
+3294 NameNode
+hadoop@linux:/home/student$ hadoop version
+Hadoop 3.2.1
+Source code repository https://gitbox.apache.org/repos/asf/hadoop.git -r
+b3cbbb467e22ea829b3808f4b7b01d07e0bf3842
+Compiled by rohithsharmaks on 2019-09-10T15:56Z
+Compiled with protoc 2.5.0
+From source with checksum 776eaf9eee9c0ffc370bcbc1888737
+This command was run using /usr/local/hadoop/share/hadoop/common/hadoop-
+common-3.2.1.jar
+hadoop@linux:/home/student$ cd /usr/local/hadoop/bin/
+
+hadoop@linux:/usr/local/hadoop/bin$ hadoop fs -ls /
+Found 4 items
+drwxr-xr-x - hadoop supergroup 0 2022-09-21 15:08 /pat
+drwxr-xr-x - hadoop supergroup 0 2022-09-21 15:01 /test
+drwxr-xr-x - hadoop supergroup 0 2022-09-21 15:05 /test1
+drwxr-xr-x - hadoop supergroup 0 2022-09-21 15:08 /test2
+hadoop@linux:/usr/local/hadoop/bin$ hadoop fs -mkdir /pat1
+hadoop@linux:/usr/local/hadoop/bin$ hadoop fs -mkdir /demo
+hadoop@linux:/usr/local/hadoop/bin$ hadoop fs -ls /
+Found 6 items
+drwxr-xr-x - hadoop supergroup 0 2022-09-22 15:01 /demo
+drwxr-xr-x - hadoop supergroup 0 2022-09-21 15:08 /pat
+drwxr-xr-x - hadoop supergroup 0 2022-09-22 14:58 /pat1
+drwxr-xr-x - hadoop supergroup 0 2022-09-21 15:01 /test
+drwxr-xr-x - hadoop supergroup 0 2022-09-21 15:05 /test1
+drwxr-xr-x - hadoop supergroup 0 2022-09-21 15:08 /test2
+
+check files available on desktop
+hadoop@linux:/usr/local/hadoop/bin$ cd /home/student/Desktop/
+hadoop@linux:/home/student/Desktop$ ls
+dda.c hadoop-3.2.1 &#39;hadoop installation steps.docx&#39;
+DDA.c hadoop-3.2.1.tar.gz &#39;hadoop installation steps.odt&#39;
+to copy dda.c file into hadoop demo directory
+hadoop@linux:/home/student/Desktop$ cd /usr/local/hadoop/bin/
+hadoop@linux:/usr/local/hadoop/bin$ hadoop fs -put /home/student/Desktop/dda.c
+/demo
+2022-09-22 15:10:03,758 INFO sasl.SaslDataTransferClient: SASL encryption trust
+check: localHostTrusted = false, remoteHostTrusted = false
+To Verify
+hadoop@linux:/usr/local/hadoop/bin$ hadoop fs -ls -R /demo
+-rw-r--r-- 1 hadoop supergroup 749 2022-09-22 15:10 /demo/dda.c
+hadoop@linux:/usr/local/hadoop/bin$ hadoop fs -copyFromLocal
+/home/hadoop/Desktop/a.txt /test1
+2022-09-22 15:27:34,584 INFO sasl.SaslDataTransferClient: SASL encryption trust
+check: localHostTrusted = false, remoteHostTrusted = false
+hadoop@linux:/usr/local/hadoop/bin$ hadoop fs -ls /test1
+Found 1 items
+-rw-r--r-- 1 hadoop supergroup 6 2022-09-22 15:27 /test1/a.txt
+hadoop@linux:/usr/local/hadoop/bin$ hadoop fs -get /demo/dda.c
+/home/hadoop/Desktop/
+2022-09-22 15:15:27,439 INFO sasl.SaslDataTransferClient: SASL encryption trust
+check: localHostTrusted = false, remoteHostTrusted = false
+hadoop@linux:/usr/local/hadoop/bin$ cd /home/hadoop/Desktop/
+hadoop@linux:~/Desktop$ ls
+dda.c
+hadoop@linux:/usr/local/hadoop/bin$ hadoop fs -ls /test1
+Found 1 items
+-rw-r--r-- 1 hadoop supergroup 6 2022-09-22 15:27 /test1/a.txt
+hadoop@linux:/usr/local/hadoop/bin$ hadoop fs -cat /test1/a.txt
+2022-09-22 15:42:15,530 INFO sasl.SaslDataTransferClient: SASL encryption trust
+check: localHostTrusted = false, remoteHostTrusted = false
+aaaaaa
+hadoop@linux:/usr/local/hadoop/bin$ hadoop fs -mv /test1/a.txt /pat1
+hadoop@linux:/usr/local/hadoop/bin$ hadoop fs -ls /pat1
+Found 1 items
+-rw-r--r-- 1 hadoop supergroup 6 2022-09-22 15:27 /pat1/a.txt
+adoop@linux:/usr/local/hadoop/bin$ hadoop fs -cp /pat1/a.txt /demo
+2022-09-22 15:47:42,433 INFO sasl.SaslDataTransferClient: SASL encryption trust
+check: localHostTrusted = false, remoteHostTrusted = false
+2022-09-22 15:47:42,505 INFO sasl.SaslDataTransferClient: SASL encryption trust
+check: localHostTrusted = false, remoteHostTrusted = false
+hadoop@linux:/usr/local/hadoop/bin$ hadoop fs -ls /demo
+Found 2 items
+
+-rw-r--r-- 1 hadoop supergroup 6 2022-09-22 15:47 /demo/a.txt
+-rw-r--r-- 1 hadoop supergroup 749 2022-09-22 15:10 /demo/dda.c
+hadoop@linux:/usr/local/hadoop/bin$ hadoop fs -ls /
+Found 6 items
+drwxr-xr-x - hadoop supergroup 0 2022-09-22 15:47 /demo
+drwxr-xr-x - hadoop supergroup 0 2022-09-21 15:08 /pat
+drwxr-xr-x - hadoop supergroup 0 2022-09-22 15:45 /pat1
+drwxr-xr-x - hadoop supergroup 0 2022-09-21 15:01 /test
+drwxr-xr-x - hadoop supergroup 0 2022-09-22 15:45 /test1
+drwxr-xr-x - hadoop supergroup 0 2022-09-21 15:08 /test2
+
+hadoop@linux:/usr/local/hadoop/bin$ hadoop fs -rmdir /test2
+hadoop@linux:/usr/local/hadoop/bin$ hadoop fs -ls /
+Found 5 items
+drwxr-xr-x - hadoop supergroup 0 2022-09-22 15:47 /demo
+drwxr-xr-x - hadoop supergroup 0 2022-09-21 15:08 /pat
+drwxr-xr-x - hadoop supergroup 0 2022-09-22 15:45 /pat1
+drwxr-xr-x - hadoop supergroup 0 2022-09-21 15:01 /test
+drwxr-xr-x - hadoop supergroup 0 2022-09-22 15:45 /test1
+hadoop@linux:/usr/local/hadoop/bin$ hadoop fs -rm /demo/a.txt
+Deleted /demo/a.txt
+hadoop@linux:/usr/local/hadoop/bin$ hadoop fs -ls /demo/
+Found 1 items
+-rw-r--r-- 1 hadoop supergroup 749 2022-09-22 15:10 /demo/dda.c
+
