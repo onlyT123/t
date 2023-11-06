@@ -1,0 +1,24 @@
+mongod --version
+
+1. use database_name - used to create database. If database already exists then it will load that database
+
+2. show dbs - to display all available databases
+
+3. db.dropDatabase() - used to drop the database being used
+
+4. db.createCollection("db_Name") - used to create collections
+
+5. db.collection_name.drop() - used to drop a collection from the database.
+
+6. db.collection_name.insert({name:"sandeep" , add:"khairpada"}) - used to insert data into MongoDB collection
+
+7. db.collection_name.find({}).pretty() - used to query data from MongoDB collection
+
+8. db.collection_name.update({selection_criteria},{$set{updated_data}}) - to update data
+
+9. db.collection_name.remove({deletion_criteria}) - to delete an object from a document
+
+10. db.collection_name.remove({}) - to delete all documents from a collection
+
+11. db.collection_name.find().sort({KEY:1}) - used to sort data in ascending order, use -1 for descending order
+

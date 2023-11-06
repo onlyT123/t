@@ -240,3 +240,5 @@ hadoop@linux:/usr/local/hadoop/bin$ hadoop fs -ls /demo/
 Found 1 items
 -rw-r--r-- 1 hadoop supergroup 749 2022-09-22 15:10 /demo/dda.c
 
+
+

@@ -1,0 +1,55 @@
+import java.util.Random;
+
+public class FlajoletMartin {
+    private static final int NUM_HASH_FUNCTIONS = 10;
+    private int[] maxZeros; // Stores the maximum number of trailing zeros for each hash function
+
+    public FlajoletMartin() {
+        maxZeros = new int[NUM_HASH_FUNCTIONS];
+    }
+
+    public void process(String element) {
+        Random rand = new Random(element.hashCode());
+        for (int i = 0; i < NUM_HASH_FUNCTIONS; i++) {
+            int trailingZeros = countTrailingZeros(rand.nextInt());
+            maxZeros[i] = Math.max(maxZeros[i], trailingZeros);
+        }
+    }
+
+    public int estimateDistinctCount() {
+        double sum = 0;
+        for (int maxZero : maxZeros) {
+            sum += Math.pow(2, maxZero);
+        }
+        double harmonicMean = NUM_HASH_FUNCTIONS / sum;
+        return (int) (Math.pow(2, harmonicMean) * NUM_HASH_FUNCTIONS);
+    }
+
+    // Count trailing zeros in the binary representation of a number
+    private int countTrailingZeros(int num) {
+        int count = 0;
+        while ((num & 1) == 0 && num > 0) {
+            count++;
+            num >>= 1;
+        }
+        return count;
+    }
+
+    public static void main(String[] args) {
+        FlajoletMartin fm = new FlajoletMartin();
+
+        // Simulate a data stream
+        String[] dataStream = {"apple", "banana", "cherry", "date", "elderberry", "fig", "grape", "honeydew", "kiwi", "lemon", "lemon", "fruites"};
+
+        for (String element : dataStream) {
+            fm.process(element);
+        }
+
+        int estimatedDistinctCount = fm.estimateDistinctCount();
+        System.out.println("Estimated distinct count: " + estimatedDistinctCount);
+    }
+}
+
+javac fine_name.java // compile
+
+java file_name // run 

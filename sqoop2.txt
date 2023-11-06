@@ -1,0 +1,404 @@
+Step 1 - Update. Open a terminal (CTRL + ALT + T) and type the following sudo command. It is
+advisable to run this before installing any package, and necessary to run it to install the latest
+updates, even if you have not added or removed any Software Sources.
+$ sudo apt-get update
+Step 2 - Installing Java 7.
+$ sudo apt-get install openjdk-7-jdk
+
+Step 3 - Creating sqoop directory.
+$ sudo mkdir usr/local/usr
+Step 4 - Change the ownership and permissions of the directory /usr/local/sqoop. Here
+'hduser' is an Ubuntu username.
+
+$ sudo chown -R hduser/usr/local/sqoop
+$ sudo chmod -R 755 /usr/local/sqoop
+
+Step 5 - Change the directory to /home/hduser/Desktop , In my case the downloaded sqoop-
+1.4.6.bin__hadoop-2.0.4-alpha.tar.gz file is in /home/hduser/Desktop folder. For you it might
+
+be in /downloads folder check it.
+$ cd /home/hduser/Desktop/
+Step 6 - Untar the sqoop-1.4.6.bin__hadoop-2.0.4-alpha.tar.gz file.
+$ tar xzf sqoop-1.4.6. bin_hadoop-2.0.4.bin_hadoop-2.0.4-alpha.tar.qz
+Step 7 - Move the contents of sqoop-1.4.6.bin__hadoop-2.0.4-alpha folder to
+/usr/local/hadoop
+$ mv sqoop-1.4.6.bin__hadoop-2.0.4-alpha/* /usr/local/sqoop
+Step 8 – Edit $HOME/.bashrc file by adding the sqoop path.
+$ sudo gedit $HOME/.bashrc
+$HOME/.bashrc file. Add the following lines
+export SQOOP_HOME=/usr/local/sqoop
+export PATH=$PATH:$SQOOP_HOME/bin
+Step 9 – Reload your changed $HOME/.bashrc settings
+$ source $HOME/.bashrc
+Step 9 – Change the directory to usr/local/sqoop/conf
+$ cd $SQOOP_HOME/conf
+Step 11 - Copy the default sqoop-env-template.sh to sqoop-env.sh
+$ cp sqoop-env-templete.sh sqoop-env.sh
+Step 12 - Edit sqoop-env.sh file.
+$ gedit sqoop-env.sh
+Step 13 - Add the below lines to sqoop-env.sh file.
+export HADOOP_COMMON_HOME=/usr/local/hadoop
+export HADOOP_MAPRED_HOME=/usr/local/hadoop
+Step 14 - Copy the mysql-connector-java-5.1.28.jar to /sqoop/lib/ folder.
+$ cp /usr/share/java/mysql-connector-java-5.1.28.jar /usr/local/sqoop/lib
+Step 15 - Change the directory to /usr/local/sqoop/bin
+$ cd $SQOOP_HOM/bin
+Step 16 - Verify Installation
+$ sqoop-version OR $ sqoop version
+Sqoop Import From MySQL Database data to HDFS
+
+The 'Import tool' imports individual tables from RDBMS to HDFS. Each row in a table is treated
+as a record in HDFS. All records are stored as text data in the text files or as binary data in Avro
+and Sequence files.
+Step 1 - Change the directory to /usr/local/hadoop/sbin
+$ cd /usr/local/hadoop/sbin
+Step 2 - Start all hadoop daemons.
+$ start-all.sh
+Step 3 - The JPS (Java Virtual Machine Process Status Tool) tool is limited to reporting
+information on JVMs for which it has the access permissions.
+$ jps
+Step 4 - Enter into MySQL command line inteface(CLI). Open a terminal (CTRL + ALT +
+T) and type the following command.
+$ mysql -u root -p
+Enter password: *****
+Step 5 - Create a new database 'userdb'
+mysql> create database userdb;
+Step 6 - Use database 'userdb'
+mysql> use userdb;
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+Database changed
+Step 7 - Create a new table 'indrajeet'
+mysql> create table indrajeet(id int,name varchar(20),salary int,primary key(id));
+Query OK, 0 rows affected (0.03 sec)
+
+Step 8 - Insert data into indrajeet table.
+mysql> insert into indrajeet values(01,'suhas',15000);
+Query OK, 1 row affected (0.00 sec)
+mysql> insert into indrajeet values(02,'manish',15500);
+Query OK, 1 row affected (0.03 sec)
+mysql> insert into indrajeet values(03,'rohan',20000);
+Query OK, 1 row affected (0.01 sec)
+mysql> insert into indrajeet values(04,'harsh',25000);
+Query OK, 1 row affected (0.04 sec)
+mysql> insert into indrajeet values(05,'raj',30000);
+Query OK, 1 row affected (0.01 sec)
+
+Step 9 – Verify
+mysql> select * from indrajeet;
++----+--------+--------+
+| id | name | salary |
++----+--------+--------+
+| 1 | suhas | 15000 |
+| 2 | manish | 15500 |
+| 3 | rohan | 20000 |
+| 4 | harsh | 25000 |
+| 5 | raj | 30000 |
++----+--------+--------+
+5 rows in set (0.00 sec)
+Step 10 - Create a new table 'indrajeet_add'
+mysql> create table indrajeet_add(id int,hno varchar(20),street varchar(20),city
+varchar(20),primary key(id));
+Query OK, 0 rows affected (0.01 sec)
+Step 11 - Insert data into indrajeet_add table.
+mysql> insert into indrajeet_add values(01,'103','abc','palghar');
+Query OK, 1 row affected (0.00 sec)
+mysql> insert into indrajeet_add values(02,'104','nmb','virar');
+Query OK, 1 row affected (0.03 sec)
+mysql> insert into indrajeet_add values(03,'105','fbs','boisar');
+Query OK, 1 row affected (0.01 sec)
+mysql> insert into indrajeet_add values(04,'106','bfs','vasai');
+Query OK, 1 row affected (0.00 sec)
+mysql> insert into indrajeet_add values(05,'107','xyz','borivali');
+Query OK, 1 row affected (0.01 sec)
+Step 12 - Verify
+mysql> select * from indrajeet_add;
++----+------+--------+----------+
+| id | hno | street | city |
++----+------+--------+----------+
+| 1 | 103 | abc | palghar |
+| 2 | 104 | nmb | virar |
+| 3 | 105 | fbs | boisar |
+| 4 | 106 | bfs | vasai |
+| 5 | 107 | xyz | borivali |
++----+------+--------+----------+
+5 rows in set (0.00 sec)
+Step 13 - Create a new table 'indrajeet_con'
+
+mysql> create table indrajeet_con(id int,phno varchar(20),mail varchar(20),primary key(id));
+Query OK, 0 rows affected (0.04 sec)
+Step 14 - Insert data into indrajeet_con table.
+mysql> insert into indrajeet_con values(01,'3514684','dasfa');
+Query OK, 1 row affected (0.01 sec)
+mysql> insert into indrajeet_con values(02,'35668184','saufag');
+Query OK, 1 row affected (0.01 sec)
+mysql> insert into indrajeet_con values(03,'646648184','afaufc');
+Query OK, 1 row affected (0.02 sec)
+mysql> insert into indrajeet_con values(04,'143144','afhaduk');
+Query OK, 1 row affected (0.01 sec)
+mysql> insert into indrajeet_con values(05,'98994','fausfu7zfk');
+Query OK, 1 row affected (0.00 sec)
+Step 15 - Change the directory to /usr/local/sqoop/bin
+$ cd /usr/local/sqoop/bin
+Step 16 - The following command is used to import the employee table from MySQL
+database server to HDFS.
+$ sqoop import --connect jdbc:mysql://localhost/userdb --username root --password 123 --table
+indrajeet --m 1
+Warning: /usr/local/sqoop/../hbase does not exist! HBase imports will fail.
+Please set $HBASE_HOME to the root of your HBase installation.
+Warning: /usr/local/sqoop/../hcatalog does not exist! HCatalog jobs will fail.
+Please set $HCAT_HOME to the root of your HCatalog installation.
+Warning: /usr/local/sqoop/../accumulo does not exist! Accumulo imports will fail.
+Please set $ACCUMULO_HOME to the root of your Accumulo installation.
+Warning: /usr/local/sqoop/../zookeeper does not exist! Accumulo imports will fail.
+Please set $ZOOKEEPER_HOME to the root of your Zookeeper installation.
+19/10/05 11:18:53 INFO sqoop.Sqoop: Running Sqoop version: 1.4.6
+19/10/05 11:18:53 WARN tool.BaseSqoopTool: Setting your password on the command-line is
+insecure. Consider using -P instead.
+19/10/05 11:18:53 INFO manager.MySQLManager: Preparing to use a MySQL streaming
+resultset.
+19/10/05 11:18:53 INFO tool.CodeGenTool: Beginning code generation
+19/10/05 11:18:54 INFO manager.SqlManager: Executing SQL statement: SELECT t.* FROM
+`indrajeet` AS t LIMIT 1
+19/10/05 11:18:54 INFO manager.SqlManager: Executing SQL statement: SELECT t.* FROM
+`indrajeet` AS t LIMIT 1
+19/10/05 11:18:54 INFO orm.CompilationManager: HADOOP_MAPRED_HOME is
+/usr/local/hadoop
+Note: /tmp/sqoop-hduser/compile/c8aff20a88d88a6ebaa43613f63186a0/indrajeet.java uses or
+overrides a deprecated API.
+
+Note: Recompile with -Xlint:deprecation for details.
+
+19/10/05 11:18:57 INFO orm.CompilationManager: Writing jar file: /tmp/sqoop-
+hduser/compile/c8aff20a88d88a6ebaa43613f63186a0/indrajeet.jar
+
+19/10/05 11:18:57 WARN manager.MySQLManager: It looks like you are importing from
+mysql.
+19/10/05 11:18:57 WARN manager.MySQLManager: This transfer can be faster! Use the --
+direct
+19/10/05 11:18:57 WARN manager.MySQLManager: option to exercise a MySQL-specific fast
+path.
+19/10/05 11:18:57 INFO manager.MySQLManager: Setting zero DATETIME behavior to
+convertToNull (mysql)
+19/10/05 11:18:57 INFO mapreduce.ImportJobBase: Beginning import of indrajeet
+19/10/05 11:18:57 WARN util.NativeCodeLoader: Unable to load native-hadoop library for
+your platform... using builtin-java classes where applicable
+19/10/05 11:18:57 INFO Configuration.deprecation: mapred.jar is deprecated. Instead, use
+mapreduce.job.jar
+19/10/05 11:18:58 INFO Configuration.deprecation: mapred.map.tasks is deprecated. Instead,
+use mapreduce.job.maps
+19/10/05 11:18:59 INFO client.RMProxy: Connecting to ResourceManager at /0.0.0.0:8032
+19/10/05 11:19:04 INFO db.DBInputFormat: Using read commited transaction isolation
+19/10/05 11:19:04 INFO mapreduce.JobSubmitter: number of splits:1
+19/10/05 11:19:05 INFO mapreduce.JobSubmitter: Submitting tokens for job:
+job_1570252552341_0001
+19/10/05 11:19:05 INFO impl.YarnClientImpl: Submitted application
+application_1570252552341_0001
+
+19/10/05 11:19:05 INFO mapreduce.Job: The url to track the job: http://aditi-
+VirtualBox:8088/proxy/application_1570252552341_0001/
+
+19/10/05 11:19:05 INFO mapreduce.Job: Running job: job_1570252552341_0001
+19/10/05 11:19:14 INFO mapreduce.Job: Job job_1570252552341_0001 running in uber mode
+: false
+19/10/05 11:19:14 INFO mapreduce.Job: map 0% reduce 0%
+19/10/05 11:19:21 INFO mapreduce.Job: map 100% reduce 0%
+19/10/05 11:19:21 INFO mapreduce.Job: Job job_1570252552341_0001 completed
+successfully
+19/10/05 11:19:21 INFO mapreduce.Job: Counters: 30
+
+File System Counters
+
+FILE: Number of bytes read=0
+FILE: Number of bytes written=133270
+FILE: Number of read operations=0
+FILE: Number of large read operations=0
+FILE: Number of write operations=0
+HDFS: Number of bytes read=87
+HDFS: Number of bytes written=69
+HDFS: Number of read operations=4
+HDFS: Number of large read operations=0
+HDFS: Number of write operations=2
+
+Job Counters
+
+Launched map tasks=1
+Other local map tasks=1
+Total time spent by all maps in occupied slots (ms)=4029
+Total time spent by all reduces in occupied slots (ms)=0
+
+Total time spent by all map tasks (ms)=4029
+Total vcore-seconds taken by all map tasks=4029
+Total megabyte-seconds taken by all map tasks=4125696
+
+Map-Reduce Framework
+Map input records=5
+Map output records=5
+Input split bytes=87
+Spilled Records=0
+Failed Shuffles=0
+Merged Map outputs=0
+GC time elapsed (ms)=63
+CPU time spent (ms)=690
+Physical memory (bytes) snapshot=131244032
+Virtual memory (bytes) snapshot=802861056
+Total committed heap usage (bytes)=73334784
+
+File Input Format Counters
+Bytes Read=0
+File Output Format Counters
+Bytes Written=69
+
+19/10/05 11:19:21 INFO mapreduce.ImportJobBase: Transferred 69 bytes in 22.5961 seconds
+(3.0536 bytes/sec)
+19/10/05 11:19:21 INFO mapreduce.ImportJobBase: Retrieved 5 records.
+Step 17 - Verify
+
+hduser@aditi-VirtualBox:/usr/local/sqoop/bin$ hdfs dfs -cat /user/hduser/indrajeet/part-m-
+00000
+
+19/10/05 11:21:11 WARN util.NativeCodeLoader: Unable to load native-hadoop library for
+your platform... using builtin-java classes where applicable
+1,suhas,15000
+2,manish,15500
+3,rohan,20000
+4,harsh,25000
+5,raj,30000
+Step 20 - The following command is used to import employee_address table data into
+'/targetflodername' directory.
+hduser@aditi-VirtualBox:/usr/local/sqoop/bin$ sqoop import --connect
+jdbc:mysql://localhost/userdb --username root --password 123 --table indrajeet_add --m 1 --
+where "street ='abc'" --target-dir /sqoop/where
+
+Warning: /usr/local/sqoop/../hbase does not exist! HBase imports will fail.
+Please set $HBASE_HOME to the root of your HBase installation.
+Warning: /usr/local/sqoop/../hcatalog does not exist! HCatalog jobs will fail.
+Please set $HCAT_HOME to the root of your HCatalog installation.
+Warning: /usr/local/sqoop/../accumulo does not exist! Accumulo imports will fail.
+Please set $ACCUMULO_HOME to the root of your Accumulo installation.
+
+Warning: /usr/local/sqoop/../zookeeper does not exist! Accumulo imports will fail.
+Please set $ZOOKEEPER_HOME to the root of your Zookeeper installation.
+19/10/05 11:37:11 INFO sqoop.Sqoop: Running Sqoop version: 1.4.6
+19/10/05 11:37:11 WARN tool.BaseSqoopTool: Setting your password on the command-line is
+insecure. Consider using -P instead.
+19/10/05 11:37:12 INFO manager.MySQLManager: Preparing to use a MySQL streaming
+resultset.
+19/10/05 11:37:12 INFO tool.CodeGenTool: Beginning code generation
+19/10/05 11:37:12 INFO manager.SqlManager: Executing SQL statement: SELECT t.* FROM
+`indrajeet_add` AS t LIMIT 1
+19/10/05 11:37:12 INFO manager.SqlManager: Executing SQL statement: SELECT t.* FROM
+`indrajeet_add` AS t LIMIT 1
+19/10/05 11:37:12 INFO orm.CompilationManager: HADOOP_MAPRED_HOME is
+/usr/local/hadoop
+Note: /tmp/sqoop-hduser/compile/4effcb92c99a82c129f39c97bec82ff4/indrajeet_add.java uses
+or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+
+19/10/05 11:37:14 INFO orm.CompilationManager: Writing jar file: /tmp/sqoop-
+hduser/compile/4effcb92c99a82c129f39c97bec82ff4/indrajeet_add.jar
+
+19/10/05 11:37:14 WARN manager.MySQLManager: It looks like you are importing from
+mysql.
+19/10/05 11:37:14 WARN manager.MySQLManager: This transfer can be faster! Use the --
+direct
+19/10/05 11:37:14 WARN manager.MySQLManager: option to exercise a MySQL-specific fast
+path.
+19/10/05 11:37:14 INFO manager.MySQLManager: Setting zero DATETIME behavior to
+convertToNull (mysql)
+19/10/05 11:37:14 INFO mapreduce.ImportJobBase: Beginning import of indrajeet_add
+19/10/05 11:37:14 WARN util.NativeCodeLoader: Unable to load native-hadoop library for
+your platform... using builtin-java classes where applicable
+19/10/05 11:37:15 INFO Configuration.deprecation: mapred.jar is deprecated. Instead, use
+mapreduce.job.jar
+19/10/05 11:37:16 INFO Configuration.deprecation: mapred.map.tasks is deprecated. Instead,
+use mapreduce.job.maps
+19/10/05 11:37:16 INFO client.RMProxy: Connecting to ResourceManager at /0.0.0.0:8032
+19/10/05 11:37:18 INFO db.DBInputFormat: Using read commited transaction isolation
+19/10/05 11:37:19 INFO mapreduce.JobSubmitter: number of splits:1
+19/10/05 11:37:19 INFO mapreduce.JobSubmitter: Submitting tokens for job:
+job_1570252552341_0004
+19/10/05 11:37:19 INFO impl.YarnClientImpl: Submitted application
+application_1570252552341_0004
+
+19/10/05 11:37:19 INFO mapreduce.Job: The url to track the job: http://aditi-
+VirtualBox:8088/proxy/application_1570252552341_0004/
+
+19/10/05 11:37:19 INFO mapreduce.Job: Running job: job_1570252552341_0004
+19/10/05 11:37:27 INFO mapreduce.Job: Job job_1570252552341_0004 running in uber mode
+: false
+19/10/05 11:37:27 INFO mapreduce.Job: map 0% reduce 0%
+19/10/05 11:37:34 INFO mapreduce.Job: map 100% reduce 0%
+19/10/05 11:37:34 INFO mapreduce.Job: Job job_1570252552341_0004 completed
+successfully
+19/10/05 11:37:34 INFO mapreduce.Job: Counters: 30
+
+File System Counters
+
+FILE: Number of bytes read=0
+FILE: Number of bytes written=133428
+FILE: Number of read operations=0
+FILE: Number of large read operations=0
+FILE: Number of write operations=0
+HDFS: Number of bytes read=87
+HDFS: Number of bytes written=18
+HDFS: Number of read operations=4
+HDFS: Number of large read operations=0
+HDFS: Number of write operations=2
+
+Job Counters
+
+Launched map tasks=1
+Other local map tasks=1
+Total time spent by all maps in occupied slots (ms)=4329
+Total time spent by all reduces in occupied slots (ms)=0
+Total time spent by all map tasks (ms)=4329
+Total vcore-seconds taken by all map tasks=4329
+Total megabyte-seconds taken by all map tasks=4432896
+
+Map-Reduce Framework
+Map input records=1
+Map output records=1
+Input split bytes=87
+Spilled Records=0
+Failed Shuffles=0
+Merged Map outputs=0
+GC time elapsed (ms)=64
+CPU time spent (ms)=750
+Physical memory (bytes) snapshot=132591616
+Virtual memory (bytes) snapshot=817676288
+Total committed heap usage (bytes)=73334784
+
+File Input Format Counters
+Bytes Read=0
+File Output Format Counters
+Bytes Written=18
+
+19/10/05 11:37:34 INFO mapreduce.ImportJobBase: Transferred 18 bytes in 18.4587 seconds
+(0.9751 bytes/sec)
+19/10/05 11:37:34 INFO mapreduce.ImportJobBase: Retrieved 1 records.
+
+hduser@aditi-VirtualBox:/usr/local/sqoop/bin$ hdfs dfs -cat /sqoop/where/part-m-
+0000019/10/05 11:37:55 WARN util.NativeCodeLoader: Unable to load native-hadoop library
+
+for your platform... using builtin-java classes where applicable
+1,103,abc,palghar
+Step 21 - Verify
+hduser@aditi-VirtualBox:/usr/local/sqoop/bin$ hdfs dfs -cat /sqoop/where/part-m-00000
+19/10/05 11:37:55 WARN util.NativeCodeLoader: Unable to load native-hadoop library for
+your platform... using builtin-java classes where applicable
+1,103,abc,palghar
+
+Incremental Import
+Incremental import is a technique that imports only the newly added rows in a table. It is
+required to add 'incremental', 'check-column', and 'last-value' options to perform the
+incremental import.
+Step 22 - Insert some more data into employee table.
+mysql> hdfs dfs -rmr /user/hduser/indrajeet
+-> hdfs dfs -rmr /user/hduser/indrajeet
+->
+-> ^CCtrl-C -- exit!
+Aborted
+mysql> hdfs dfs -rmr /user/hduser/indrajeet
+-> ^CCtrl-C -- exit!
+Aborted

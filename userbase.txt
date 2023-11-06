@@ -1,0 +1,60 @@
+import java.util.*;
+
+public class CollaborativeFiltering {
+    private Map<String, Map<String, Integer>> ratings;
+
+    public CollaborativeFiltering() {
+        ratings = new HashMap<>();
+    }
+
+    public void addUser(String user) {
+        ratings.put(user, new HashMap<>());
+    }
+
+    public void addRating(String user, String item, int rating) {
+        ratings.computeIfAbsent(user, k -> new HashMap<>()).put(item, rating);
+    }
+
+    public Map<String, Integer> recommendItems(String targetUser) {
+        Set<String> targetUserItems = ratings.get(targetUser).keySet();
+        
+        return ratings.entrySet().stream()
+                .filter(entry -> !entry.getKey().equals(targetUser))
+                .map(entry -> {
+                    Set<String> commonItems = new HashSet<>(entry.getValue().keySet());
+                    commonItems.retainAll(targetUserItems);
+
+                    int similarity = commonItems.isEmpty() ? 0 :
+                            commonItems.stream()
+                                    .mapToInt(item -> entry.getValue().get(item) * ratings.get(targetUser).get(item))
+                                    .sum() /
+                            (int) (Math.sqrt(commonItems.stream().mapToInt(item -> entry.getValue().get(item) * entry.getValue().get(item)).sum()) *
+                                   Math.sqrt(commonItems.stream().mapToInt(item -> ratings.get(targetUser).get(item) * ratings.get(targetUser).get(item)).sum()));
+
+                    Map<String, Integer> recommendations = new HashMap<>();
+                    entry.getValue().keySet().stream()
+                            .filter(item -> !targetUserItems.contains(item))
+                            .forEach(item -> recommendations.put(item, recommendations.getOrDefault(item, 0) + entry.getValue().get(item) * similarity));
+
+                    return recommendations;
+                })
+                .flatMap(recommendations -> recommendations.entrySet().stream())
+                .collect(HashMap::new, (map, entry) -> map.merge(entry.getKey(), entry.getValue(), Integer::sum), HashMap::putAll);
+    }
+
+    public static void main(String[] args) {
+        CollaborativeFiltering cf = new CollaborativeFiltering();
+
+        cf.addUser("User1");
+        cf.addRating("User1", "Item1", 5);
+        cf.addRating("User1", "Item2", 4);
+        cf.addRating("User1", "Item3", 0);
+        // Add ratings for other users...
+
+        String targetUser = "User1";
+        Map<String, Integer> recommendedItems = cf.recommendItems(targetUser);
+
+        System.out.println("Recommended items for " + targetUser + ":");
+        recommendedItems.forEach((item, rating) -> System.out.println(item + ": " + rating));
+    }
+}
